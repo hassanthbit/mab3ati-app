@@ -1,0 +1,8 @@
+{
+  "name": "sales-app-root",
+  "private": true,
+  "scripts": {
+    "start": "cd backend && npm start",
+    "dev": "cd backend && npm run dev"
+  }
+}
