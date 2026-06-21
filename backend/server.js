@@ -14,7 +14,7 @@ import pkg from 'whatsapp-web.js';
 const { Client, LocalAuth } = pkg;
 import qrcode from 'qrcode-terminal';
 
-const ENABLE_WHATSAPP = process.env.ENABLE_WHATSAPP !== 'false';
+const ENABLE_WHATSAPP = process.env.ENABLE_WHATSAPP === 'true';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
