@@ -1640,20 +1640,50 @@
 
     // INIT
     async function init() {
+      // Step 1: Check MongoDB to see if any accounts exist
+      let hasUsers = true; // default: assume accounts exist → show login
       try {
         const st = await api('GET', '/auth/setup-status');
-        if (!st.hasUsers) {
-          doc('tab-reg').style.display = 'block';
-          switchTab('register');
-        }
-      } catch (e) { }
+        hasUsers = st.hasUsers;
+      } catch (e) {
+        // If the server is unreachable, fall back to login form
+        hasUsers = true;
+      }
 
       doc('loading').style.display = 'none';
+
+      // Step 2: If a token exists in localStorage, validate it by loading data
       if (TOKEN && CU) {
-        try { await loadAll(); showApp(); } catch { showAuth(); }
-      } else {
-        showAuth();
+        try {
+          await loadAll();
+          showApp();
+          return; // Successfully authenticated — skip auth screen entirely
+        } catch (e) {
+          // Token is expired or invalid — clear it and fall through to auth screen
+          TOKEN = null;
+          CU = null;
+          localStorage.removeItem('token');
+          localStorage.removeItem('user');
+        }
       }
+
+      // Step 3: No valid token — show the correct auth form based on DB state
+      showAuthForm(hasUsers);
+    }
+
+    // Show auth screen with the correct form pre-selected based on whether
+    // accounts already exist in MongoDB
+    function showAuthForm(hasUsers) {
+      if (hasUsers) {
+        // Accounts exist → show login form, hide register tab
+        doc('tab-reg').style.display = 'none';
+        switchTab('login');
+      } else {
+        // No accounts yet → show registration form for first-time setup
+        doc('tab-reg').style.display = 'block';
+        switchTab('register');
+      }
+      showAuth();
     }
 
     async function loadAll() {
